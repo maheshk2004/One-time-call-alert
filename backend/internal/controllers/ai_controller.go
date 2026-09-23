@@ -126,3 +126,31 @@ func (ctrl *AIController) CorrectReview(c *gin.Context) {
 
 	utils.SendSuccess(c, analysis)
 }
+
+func (ctrl *AIController) AutoProcessCall(c *gin.Context) {
+	leadIDStr := c.Param("id")
+	leadID, err := primitive.ObjectIDFromHex(leadIDStr)
+	if err != nil {
+		utils.SendBadRequest(c, "Invalid lead ID")
+		return
+	}
+
+	var input services.AutoProcessInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.SendBadRequest(c, err.Error())
+		return
+	}
+
+	actor := middleware.GetCurrentUser(c)
+	call, analysis, lead, err := ctrl.aiService.AutoProcessConversation(c.Request.Context(), leadID, input, actor)
+	if err != nil {
+		utils.SendBadRequest(c, err.Error())
+		return
+	}
+
+	utils.SendCreated(c, gin.H{
+		"call":     call,
+		"analysis": analysis,
+		"lead":     lead,
+	})
+}

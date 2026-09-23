@@ -139,6 +139,29 @@ func (p *RulesEngineProvider) AnalyzeConversation(ctx context.Context, transcrip
 		}
 	}
 
+	// --- 3.5 BROKEN CALL / DISCONNECTED ---
+	brokenCallPatterns := []string{
+		"call dropped", "call cut", "voice is breaking", "voice breaking", "line disconnected",
+		"can you hear me", "hello hello", "call getting disconnected", "voice cut", "call disconnected",
+		"awaz nahi aa rahi", "awaz cut rahi hai", "line cut gaya", "voice break aagudhu",
+	}
+	for _, pattern := range brokenCallPatterns {
+		if strings.Contains(leadText, pattern) {
+			evidence := extractEvidence(leadSegments, pattern)
+			return &AnalysisResult{
+				Intent:                 models.AIIntentFollowUpRequired,
+				Confidence:             0.94,
+				Sentiment:              models.SentimentNeutral,
+				FollowUpRequired:       true,
+				DoNotCall:              false,
+				SuggestedFollowUpHours: 1,
+				Summary:                "Call dropped or got disconnected. Immediate re-dial required.",
+				Reason:                 "Audio/call breakage detected in transcript.",
+				Evidence:               evidence,
+			}, nil
+		}
+	}
+
 	// --- 4. CALL BACK LATER (Busy / Request to reschedule) ---
 	callLaterPatterns := []string{
 		"call me tomorrow", "call me later", "call after", "call back later", "busy right now",
@@ -149,19 +172,33 @@ func (p *RulesEngineProvider) AnalyzeConversation(ctx context.Context, transcrip
 	for _, pattern := range callLaterPatterns {
 		if strings.Contains(leadText, pattern) {
 			evidence := extractEvidence(leadSegments, pattern)
+
+			// Smart Timing Calculation
+			suggestedHours := 24
+			if strings.Contains(leadText, "2 hours") || strings.Contains(leadText, "after 2 hours") {
+				suggestedHours = 2
+			} else if strings.Contains(leadText, "evening") || strings.Contains(leadText, "shaam") {
+				suggestedHours = 6
+			} else if strings.Contains(leadText, "tomorrow morning") || strings.Contains(leadText, "kal subah") {
+				suggestedHours = 14
+			} else if strings.Contains(leadText, "meeting") || strings.Contains(leadText, "driving") || strings.Contains(leadText, "busy right now") {
+				suggestedHours = 3
+			}
+
 			return &AnalysisResult{
 				Intent:                 models.AIIntentCallBackLater,
 				Confidence:             0.92,
 				Sentiment:              models.SentimentNeutral,
 				FollowUpRequired:       true,
 				DoNotCall:              false,
-				SuggestedFollowUpHours: 24,
+				SuggestedFollowUpHours: suggestedHours,
 				Summary:                "Lead is temporarily occupied and requested a call back later.",
 				Reason:                 "Call back or busy indication provided by lead.",
 				Evidence:               evidence,
 			}, nil
 		}
 	}
+
 
 	// --- 5. INFO REQUESTED (WhatsApp / Email / Brochure) ---
 	infoPatterns := []string{

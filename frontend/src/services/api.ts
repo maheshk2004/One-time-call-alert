@@ -80,6 +80,8 @@ export const leadsApi = {
 export const callsApi = {
   recordCall: (leadId: string, data: any): Promise<CallAttempt> =>
     api.post(`/leads/${leadId}/calls`, data),
+  autoProcessCall: (leadId: string, data: { transcriptText: string; durationSeconds?: number }): Promise<{ call: CallAttempt; analysis: AIAnalysis }> =>
+    api.post(`/leads/${leadId}/auto-call`, data),
   getCallsForLead: (leadId: string): Promise<CallAttempt[]> =>
     api.get(`/leads/${leadId}/calls`),
   getCall: (id: string): Promise<CallAttempt> => api.get(`/calls/${id}`),

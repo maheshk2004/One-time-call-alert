@@ -9,10 +9,10 @@ export const AppLayout: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-xs text-gray-400 font-medium tracking-wide">Loading system session...</p>
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-xs text-slate-500 font-medium tracking-wide">Loading system session...</p>
         </div>
       </div>
     );
@@ -23,11 +23,11 @@ export const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-indigo-600 selection:text-white">
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto max-h-[calc(100vh-4rem)]">
+        <main className="flex-1 p-8 overflow-y-auto max-h-[calc(100vh-4rem)] bg-white">
           <div className="max-w-7xl mx-auto space-y-6">
             <Outlet />
           </div>

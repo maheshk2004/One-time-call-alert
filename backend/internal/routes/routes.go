@@ -77,6 +77,7 @@ func SetupRouter(deps *RouterDependencies) *gin.Engine {
 
 			// Call Tracking
 			authRequired.POST("/leads/:id/calls", deps.CallController.RecordCall)
+			authRequired.POST("/leads/:id/auto-call", deps.AIController.AutoProcessCall)
 			authRequired.GET("/leads/:id/calls", deps.CallController.GetCallsForLead)
 			authRequired.GET("/calls/:id", deps.CallController.GetCall)
 
